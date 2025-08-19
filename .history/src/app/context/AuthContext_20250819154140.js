@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }) => {
       typeof window !== "undefined" ? window.location.pathname : "";
     const isSuperAdminSystem = currentPath.includes("/home-master");
 
-    if (isSuperAdminSystem && auth) {
+    if (isSuperAdminSystem) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         console.log("🔄 Firebase Auth state changed:", user?.email);
         if (!isChecking) {

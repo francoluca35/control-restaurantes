@@ -48,9 +48,7 @@ try {
     db = getFirestore(app);
     realtime = getDatabase(app);
   } else {
-    console.warn(
-      "Firebase configuration not available or not in browser environment"
-    );
+    console.warn("Firebase configuration not available or not in browser environment");
     // Create mock objects for server-side rendering
     auth = null;
     db = null;
@@ -67,7 +65,7 @@ try {
     // Don't throw error in production, just log it
     console.error("Firebase initialization failed in production:", error);
   }
-
+  
   // Create mock objects
   auth = null;
   db = null;

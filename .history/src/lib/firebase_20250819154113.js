@@ -40,22 +40,11 @@ const validateFirebaseConfig = (config) => {
 let app, auth, db, realtime;
 
 try {
-  // Check if we're in a browser environment and have the required config
-  if (typeof window !== "undefined" && firebaseConfig.apiKey) {
-    validateFirebaseConfig(firebaseConfig);
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    realtime = getDatabase(app);
-  } else {
-    console.warn(
-      "Firebase configuration not available or not in browser environment"
-    );
-    // Create mock objects for server-side rendering
-    auth = null;
-    db = null;
-    realtime = null;
-  }
+  validateFirebaseConfig(firebaseConfig);
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  realtime = getDatabase(app);
 } catch (error) {
   console.error("Firebase initialization error:", error);
   // In development, we might want to continue with mock data
@@ -64,14 +53,8 @@ try {
       "Firebase initialization failed, but continuing in development mode"
     );
   } else {
-    // Don't throw error in production, just log it
-    console.error("Firebase initialization failed in production:", error);
+    throw error;
   }
-
-  // Create mock objects
-  auth = null;
-  db = null;
-  realtime = null;
 }
 
 export { auth, db, realtime };

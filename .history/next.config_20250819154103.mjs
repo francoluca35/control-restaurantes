@@ -14,10 +14,10 @@ const nextConfig = {
     if (isServer) {
       config.externals = config.externals || [];
       config.externals.push({
-        "firebase/app": "commonjs firebase/app",
-        "firebase/auth": "commonjs firebase/auth",
-        "firebase/firestore": "commonjs firebase/firestore",
-        "firebase/database": "commonjs firebase/database",
+        'firebase/app': 'commonjs firebase/app',
+        'firebase/auth': 'commonjs firebase/auth',
+        'firebase/firestore': 'commonjs firebase/firestore',
+        'firebase/database': 'commonjs firebase/database',
       });
     }
     return config;
