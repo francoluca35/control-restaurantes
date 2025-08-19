@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../../../lib/firebase";
+import { auth, db } from "../../../lib/firebase";
 import { getDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import AuthDebugger from "../../../components/AuthDebugger";
+import AuthDebugger from "../../../components/AuthDebugger.js";
 
 export default function LoginSuperadmin() {
   const [email, setEmail] = useState("");

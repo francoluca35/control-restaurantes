@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useMetrics } from "../../../hooks/useMetrics";
+import { useMetrics } from "../../../hooks/useMetrics.js";
 import AlertsPanel from "./components/AlertsPanel";
 import PerformanceDashboard from "./components/PerformanceDashboard";
 import BusinessDashboard from "./components/BusinessDashboard";

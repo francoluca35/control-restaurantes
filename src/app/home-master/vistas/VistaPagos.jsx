@@ -8,7 +8,6 @@ import {
   FaCheckCircle,
   FaClock,
   FaSearch,
-  FaFilter,
   FaEye,
   FaBell,
   FaDollarSign,
@@ -18,7 +17,7 @@ import {
   FaBan,
   FaCheck,
 } from "react-icons/fa";
-import { usePagos } from "../../../hooks/usePagos";
+import { usePagos } from "../../../hooks/usePagos.js";
 
 export default function VistaPagos() {
   const router = useRouter();
@@ -43,12 +42,28 @@ export default function VistaPagos() {
 
   // Filtrar restaurantes usando el hook
   const filteredRestaurants = useMemo(() => {
-    return filterRestaurants(searchTerm, filterStatus);
+    try {
+      return filterRestaurants(searchTerm, filterStatus);
+    } catch (error) {
+      console.error("Error filtering restaurants:", error);
+      return [];
+    }
   }, [filterRestaurants, searchTerm, filterStatus]);
 
   // Estadísticas usando el hook
   const stats = useMemo(() => {
-    return getPaymentStats();
+    try {
+      return getPaymentStats();
+    } catch (error) {
+      console.error("Error calculating payment stats:", error);
+      return {
+        total: 0,
+        alDia: 0,
+        proximos: 0,
+        vencidos: 0,
+        ingresosMensuales: 0,
+      };
+    }
   }, [getPaymentStats]);
 
   // Función para obtener el color del estado
@@ -85,7 +100,7 @@ export default function VistaPagos() {
 
     try {
       // Si es un timestamp de Firestore, convertirlo
-      if (date.toDate) {
+      if (date && typeof date.toDate === "function") {
         return date.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "short",
@@ -105,6 +120,7 @@ export default function VistaPagos() {
         day: "numeric",
       });
     } catch (error) {
+      console.error("Error formatting date:", error, date);
       return "Error en fecha";
     }
   };

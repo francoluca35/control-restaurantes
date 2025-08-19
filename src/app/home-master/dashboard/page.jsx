@@ -8,6 +8,7 @@ import VistaRestaurantes from "../vistas/VistaRestaurantes";
 import VistaPagos from "../vistas/VistaPagos";
 import VistaHistorial from "../vistas/VistaHistorial";
 import VistaActivacion from "../vistas/VistaActivacion";
+import ErrorBoundary from "../../../components/ErrorBoundary";
 export default function DashboardMaster() {
   const { usuario, rol, loading } = useAuth();
   const router = useRouter();
@@ -46,15 +47,35 @@ export default function DashboardMaster() {
   const renderVista = () => {
     switch (vista) {
       case "restaurantes":
-        return <VistaRestaurantes />;
+        return (
+          <ErrorBoundary>
+            <VistaRestaurantes />
+          </ErrorBoundary>
+        );
       case "pagos":
-        return <VistaPagos />;
+        return (
+          <ErrorBoundary>
+            <VistaPagos />
+          </ErrorBoundary>
+        );
       case "historial":
-        return <VistaHistorial />;
+        return (
+          <ErrorBoundary>
+            <VistaHistorial />
+          </ErrorBoundary>
+        );
       case "activacion":
-        return <VistaActivacion />;
+        return (
+          <ErrorBoundary>
+            <VistaActivacion />
+          </ErrorBoundary>
+        );
       default:
-        return <VistaDashboard />;
+        return (
+          <ErrorBoundary>
+            <VistaDashboard />
+          </ErrorBoundary>
+        );
     }
   };
   return (

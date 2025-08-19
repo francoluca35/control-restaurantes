@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, useEffect } from "react";
-import { useErrorHandler } from "../hooks/useErrorHandler";
+import { useErrorHandler } from "../hooks/useErrorHandler.js";
 import toast from "react-hot-toast";
 
 // Configuración optimizada para React Query

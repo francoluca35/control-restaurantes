@@ -2,9 +2,9 @@
 import React, { useMemo, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateRestaurant } from "../../../hooks/useMasterAPI";
-import { schemas } from "../../../schemas/validation";
-import { useErrorHandler } from "../../../hooks/useErrorHandler";
+import { useCreateRestaurant } from "../../../hooks/useMasterAPI.js";
+import { schemas } from "../../../schemas/validation.js";
+import { useErrorHandler } from "../../../hooks/useErrorHandler.js";
 import { useUI } from "../../../store";
 import jsPDF from "jspdf";
 

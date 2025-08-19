@@ -13,8 +13,48 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+// Validate Firebase configuration
+const validateFirebaseConfig = (config) => {
+  const requiredFields = [
+    "apiKey",
+    "authDomain",
+    "projectId",
+    "storageBucket",
+    "messagingSenderId",
+    "appId",
+  ];
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const realtime = getDatabase(app);
+  const missingFields = requiredFields.filter((field) => !config[field]);
+
+  if (missingFields.length > 0) {
+    console.error("Missing Firebase configuration fields:", missingFields);
+    throw new Error(
+      `Firebase configuration is incomplete. Missing: ${missingFields.join(
+        ", "
+      )}`
+    );
+  }
+};
+
+// Initialize Firebase with error handling
+let app, auth, db, realtime;
+
+try {
+  validateFirebaseConfig(firebaseConfig);
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  realtime = getDatabase(app);
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+  // In development, we might want to continue with mock data
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      "Firebase initialization failed, but continuing in development mode"
+    );
+  } else {
+    throw error;
+  }
+}
+
+export { auth, db, realtime };

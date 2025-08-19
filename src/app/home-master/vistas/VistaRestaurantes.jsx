@@ -20,8 +20,8 @@ import {
   FaDownload,
   FaBell,
 } from "react-icons/fa";
-import { useRestaurantMonitoring } from "../../../hooks/useRestaurantMonitoring";
-import { useMetrics } from "../../../hooks/useMetrics";
+import { useRestaurantMonitoring } from "../../../hooks/useRestaurantMonitoring.js";
+import { useMetrics } from "../../../hooks/useMetrics.js";
 
 export default function VistaRestaurantes() {
   const {

@@ -1,6 +1,6 @@
 import CardEstadistica from "./CardEstadistica";
 import { FaMoneyBillAlt, FaStore } from "react-icons/fa";
-import { useDashboardStats } from "../../../../hooks/useDashboardStats";
+import { useDashboardStats } from "../../../../hooks/useDashboardStats.js";
 
 export default function ResumenCards() {
   const { stats, loading } = useDashboardStats();

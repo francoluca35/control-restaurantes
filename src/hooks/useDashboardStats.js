@@ -7,7 +7,7 @@ import {
   orderBy,
   limit,
 } from "firebase/firestore";
-import { db } from "../../lib/firebase";
+import { db } from "@/lib/firebase";
 
 export const useDashboardStats = () => {
   const [stats, setStats] = useState({

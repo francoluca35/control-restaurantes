@@ -1,4 +1,4 @@
-import { useDashboardStats } from "../../../../hooks/useDashboardStats";
+import { useDashboardStats } from "../../../../hooks/useDashboardStats.js";
 
 export default function GraficosDashboard() {
   const { stats, loading } = useDashboardStats();

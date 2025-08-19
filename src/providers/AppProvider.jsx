@@ -2,13 +2,9 @@
 import React, { useEffect } from "react";
 import { QueryProvider } from "./QueryProvider";
 import { Toaster } from "react-hot-toast";
-import { useAuth, AuthProvider } from "../app/context/AuthContext";
-import { useErrorHandler } from "../hooks/useErrorHandler";
-import { TurnoProvider } from "../app/context/TurnoContext";
-import { RoleProvider } from "../app/context/RoleContext";
-import { RestaurantProvider } from "../app/context/RestaurantContext";
-import { ProviderFallback } from "../components/ProviderFallback";
-import metricsCollector from "../lib/metrics";
+import { useAuth, AuthProvider } from "../app/context/AuthContext.js";
+import { useErrorHandler } from "../hooks/useErrorHandler.js";
+import { RoleProvider } from "../context/RoleContext";
 
 // Configuración de toast notifications
 const toastConfig = {
@@ -73,37 +69,29 @@ const AuthHandler = ({ children }) => {
     // Verificar sesión expirada solo si hay usuario y no está cargando
     if (!loading && usuario) {
       const checkSessionExpiry = () => {
-        // Verificar si estamos en el sistema de restaurantes
+        // Verificar si estamos en el sistema de superadmin
         const currentPath = window.location.pathname;
-        const isRestaurantSystem = currentPath.includes("/home-comandas");
+        const isSuperAdminSystem = currentPath.includes("/home-master");
 
-        if (isRestaurantSystem) {
-          // Para el sistema de restaurantes, verificamos restauranteId
-          const restauranteId = localStorage.getItem("restauranteId");
-          const usuarioLocal = localStorage.getItem("usuario");
+        if (isSuperAdminSystem) {
+          // Para el sistema de superadmin, verificamos Firebase Auth
+          const superadminEmail = localStorage.getItem("superadmin_email");
+          const superadminRol = localStorage.getItem("superadmin_rol");
 
-          if (!restauranteId || !usuarioLocal) {
-            console.log("🔍 Sesión de restaurante expirada - datos faltantes");
+          if (!superadminEmail || superadminRol !== "superadmin") {
+            console.log("🔍 Sesión de superadmin expirada - datos faltantes");
             handleError(new Error("Sesión expirada"), "authentication", {
               showToast: true,
             });
 
-            // Limpiar localStorage del restaurante
-            localStorage.removeItem("usuario");
-            localStorage.removeItem("rol");
-            localStorage.removeItem("usuarioId");
-            localStorage.removeItem("restauranteId");
-            localStorage.removeItem("nombreResto");
-            localStorage.removeItem("emailResto");
-            localStorage.removeItem("cantUsuarios");
-            localStorage.removeItem("finanzas");
-            localStorage.removeItem("logo");
+            // Limpiar localStorage del superadmin
+            localStorage.removeItem("superadmin_email");
+            localStorage.removeItem("superadmin_rol");
 
-            // Redirigir al prelogin de restaurantes
-            window.location.href = "/comandas/prelogin";
+            // Redirigir al login de superadmin
+            window.location.href = "/home-master/login";
           }
         }
-        // Para superadmin, confiamos completamente en AuthContext
       };
 
       checkSessionExpiry();
@@ -169,24 +157,18 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   return (
-    <ProviderFallback>
-      <QueryProvider>
-        <AuthProvider>
-          <RestaurantProvider>
-            <GlobalErrorHandler>
-              <AuthHandler>
-                <RoleProvider>
-                  <TurnoProvider>
-                    {children}
-                    <Toaster {...toastConfig} />
-                  </TurnoProvider>
-                </RoleProvider>
-              </AuthHandler>
-            </GlobalErrorHandler>
-          </RestaurantProvider>
-        </AuthProvider>
-      </QueryProvider>
-    </ProviderFallback>
+    <QueryProvider>
+      <AuthProvider>
+        <GlobalErrorHandler>
+          <AuthHandler>
+            <RoleProvider>
+              {children}
+              <Toaster {...toastConfig} />
+            </RoleProvider>
+          </AuthHandler>
+        </GlobalErrorHandler>
+      </AuthProvider>
+    </QueryProvider>
   );
 };
 
