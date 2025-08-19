@@ -45,19 +45,12 @@ try {
     firebaseConfig.apiKey &&
     firebaseConfig.apiKey !== ""
   ) {
-    const isValid = validateFirebaseConfig(firebaseConfig);
-    if (isValid) {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-      realtime = getDatabase(app);
-      console.log("✅ Firebase initialized successfully");
-    } else {
-      console.warn("Firebase configuration is invalid, using mock objects");
-      auth = null;
-      db = null;
-      realtime = null;
-    }
+    validateFirebaseConfig(firebaseConfig);
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    realtime = getDatabase(app);
+    console.log("✅ Firebase initialized successfully");
   } else {
     console.warn(
       "Firebase configuration not available or not in browser environment"
