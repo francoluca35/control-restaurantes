@@ -74,45 +74,27 @@ export default function LoginSuperadmin() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <div className="flex flex-col space-y-4 w-80">
+      <form onSubmit={handleLogin} className="flex flex-col space-y-4 w-80">
         <h1 className="text-2xl font-bold">Login SuperAdmin</h1>
-
-        {error && (
-          <div className="bg-red-900 border border-red-700 text-red-200 p-3 rounded">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="flex flex-col space-y-4">
-          <input
-            type="email"
-            placeholder="Correo"
-            className="p-2 bg-gray-800 rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            className="p-2 bg-gray-800 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            className={`p-2 rounded ${
-              isLoading ? "bg-gray-600" : "bg-blue-600"
-            }`}
-            disabled={isLoading}
-          >
-            {isLoading ? "Cargando..." : "Entrar"}
-          </button>
-        </form>
-
-        <AuthDebugger />
-      </div>
+        <input
+          type="email"
+          placeholder="Correo"
+          className="p-2 bg-gray-800 rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          className="p-2 bg-gray-800 rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit" className="bg-blue-600 p-2 rounded">
+          Entrar
+        </button>
+      </form>
+      <AuthDebugger />
     </div>
   );
 }

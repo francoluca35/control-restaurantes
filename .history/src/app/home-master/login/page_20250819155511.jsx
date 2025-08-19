@@ -17,15 +17,13 @@ export default function LoginSuperadmin() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+    
     try {
       console.log("🔐 Intentando login superadmin:", { email, password });
 
       // Check if Firebase is available
       if (!auth) {
-        throw new Error(
-          "Firebase no está configurado. Por favor, verifica las variables de entorno."
-        );
+        throw new Error("Firebase no está configurado. Por favor, verifica las variables de entorno.");
       }
 
       const user = await signInWithEmailAndPassword(auth, email, password);
@@ -58,61 +56,41 @@ export default function LoginSuperadmin() {
           router.push("/home-master/dashboard");
         } else {
           console.log("❌ Rol incorrecto:", userData.rol);
-          setError("No autorizado - Rol incorrecto");
+          alert("No autorizado - Rol incorrecto");
         }
       } else {
         console.log("❌ Documento no encontrado");
-        setError("Usuario no encontrado");
+        alert("Usuario no encontrado");
       }
     } catch (err) {
       console.error("❌ Error en login superadmin:", err);
-      setError("Error al iniciar sesión: " + err.message);
-    } finally {
-      setIsLoading(false);
+      alert("Error al iniciar sesión: " + err.message);
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <div className="flex flex-col space-y-4 w-80">
+      <form onSubmit={handleLogin} className="flex flex-col space-y-4 w-80">
         <h1 className="text-2xl font-bold">Login SuperAdmin</h1>
-
-        {error && (
-          <div className="bg-red-900 border border-red-700 text-red-200 p-3 rounded">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="flex flex-col space-y-4">
-          <input
-            type="email"
-            placeholder="Correo"
-            className="p-2 bg-gray-800 rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            className="p-2 bg-gray-800 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            className={`p-2 rounded ${
-              isLoading ? "bg-gray-600" : "bg-blue-600"
-            }`}
-            disabled={isLoading}
-          >
-            {isLoading ? "Cargando..." : "Entrar"}
-          </button>
-        </form>
-
-        <AuthDebugger />
-      </div>
+        <input
+          type="email"
+          placeholder="Correo"
+          className="p-2 bg-gray-800 rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          className="p-2 bg-gray-800 rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit" className="bg-blue-600 p-2 rounded">
+          Entrar
+        </button>
+      </form>
+      <AuthDebugger />
     </div>
   );
 }

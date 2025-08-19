@@ -41,11 +41,7 @@ let app, auth, db, realtime;
 
 try {
   // Check if we're in a browser environment and have the required config
-  if (
-    typeof window !== "undefined" &&
-    firebaseConfig.apiKey &&
-    firebaseConfig.apiKey !== ""
-  ) {
+  if (typeof window !== "undefined" && firebaseConfig.apiKey && firebaseConfig.apiKey !== "") {
     validateFirebaseConfig(firebaseConfig);
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);

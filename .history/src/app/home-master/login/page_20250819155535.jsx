@@ -76,13 +76,13 @@ export default function LoginSuperadmin() {
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
       <div className="flex flex-col space-y-4 w-80">
         <h1 className="text-2xl font-bold">Login SuperAdmin</h1>
-
+        
         {error && (
           <div className="bg-red-900 border border-red-700 text-red-200 p-3 rounded">
             {error}
           </div>
         )}
-
+        
         <form onSubmit={handleLogin} className="flex flex-col space-y-4">
           <input
             type="email"
@@ -100,17 +100,15 @@ export default function LoginSuperadmin() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
           />
-          <button
-            type="submit"
-            className={`p-2 rounded ${
-              isLoading ? "bg-gray-600" : "bg-blue-600"
-            }`}
+          <button 
+            type="submit" 
+            className={`p-2 rounded ${isLoading ? 'bg-gray-600' : 'bg-blue-600'}`}
             disabled={isLoading}
           >
-            {isLoading ? "Cargando..." : "Entrar"}
+            {isLoading ? 'Cargando...' : 'Entrar'}
           </button>
         </form>
-
+        
         <AuthDebugger />
       </div>
     </div>
