@@ -8,8 +8,6 @@ import {
   addDoc,
   getDoc,
   getDocs,
-  query,
-  where,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -59,55 +57,37 @@ export async function POST(request) {
     });
 
     // Extraer información del restaurante
-    const activationCode = paymentData.external_reference; // Código de activación
+    const restaurantId = paymentData.external_reference; // Usar external_reference como restaurantId
     const restaurantName =
       paymentData.additional_info?.restaurant_name || "Restaurante";
     const orderTotal = paymentData.transaction_amount;
 
     console.log("🏪 Información del restaurante:", {
-      activationCode,
+      restaurantId,
       restaurantName,
       orderTotal,
     });
 
-    if (!activationCode) {
-      console.error(
-        "❌ No se encontró código de activación en external_reference"
-      );
+    if (!restaurantId) {
+      console.error("❌ No se encontró restaurant ID en external_reference");
       return NextResponse.json(
-        { error: "Activation code not found in external_reference" },
+        { error: "Restaurant ID not found in external_reference" },
         { status: 400 }
       );
     }
 
-    // Buscar el restaurante por código de activación
-    console.log(
-      "🔍 Buscando restaurante por código de activación:",
-      activationCode
-    );
-    const restaurantsRef = collection(db, "restaurantes");
-    const q = query(
-      restaurantsRef,
-      where("codigoActivacion", "==", activationCode)
-    );
-    const querySnapshot = await getDocs(q);
+    // Obtener datos del restaurante para verificar que existe
+    const restaurantDoc = await getDoc(doc(db, "restaurantes", restaurantId));
 
-    if (querySnapshot.empty) {
-      console.error(
-        "❌ Restaurante no encontrado con código de activación:",
-        activationCode
-      );
+    if (!restaurantDoc.exists()) {
+      console.error("❌ Restaurante no encontrado en Firestore:", restaurantId);
       return NextResponse.json(
-        { error: "Restaurant not found with activation code" },
+        { error: "Restaurant not found in database" },
         { status: 404 }
       );
     }
 
-    // Tomar el primer restaurante encontrado
-    const restaurantDoc = querySnapshot.docs[0];
-    const restaurantId = restaurantDoc.id;
     const restaurantData = restaurantDoc.data();
-
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
     // Procesar el pago según su estado

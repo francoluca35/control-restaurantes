@@ -8,8 +8,6 @@ import {
   addDoc,
   getDoc,
   getDocs,
-  query,
-  where,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -107,7 +105,7 @@ export async function POST(request) {
     const restaurantDoc = querySnapshot.docs[0];
     const restaurantId = restaurantDoc.id;
     const restaurantData = restaurantDoc.data();
-
+    
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
     // Procesar el pago según su estado

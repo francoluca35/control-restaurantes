@@ -8,8 +8,6 @@ import {
   addDoc,
   getDoc,
   getDocs,
-  query,
-  where,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -71,9 +69,7 @@ export async function POST(request) {
     });
 
     if (!activationCode) {
-      console.error(
-        "❌ No se encontró código de activación en external_reference"
-      );
+      console.error("❌ No se encontró código de activación en external_reference");
       return NextResponse.json(
         { error: "Activation code not found in external_reference" },
         { status: 400 }
@@ -81,22 +77,13 @@ export async function POST(request) {
     }
 
     // Buscar el restaurante por código de activación
-    console.log(
-      "🔍 Buscando restaurante por código de activación:",
-      activationCode
-    );
+    console.log("🔍 Buscando restaurante por código de activación:", activationCode);
     const restaurantsRef = collection(db, "restaurantes");
-    const q = query(
-      restaurantsRef,
-      where("codigoActivacion", "==", activationCode)
-    );
+    const q = query(restaurantsRef, where("codigoActivacion", "==", activationCode));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.error(
-        "❌ Restaurante no encontrado con código de activación:",
-        activationCode
-      );
+      console.error("❌ Restaurante no encontrado con código de activación:", activationCode);
       return NextResponse.json(
         { error: "Restaurant not found with activation code" },
         { status: 404 }
@@ -108,6 +95,7 @@ export async function POST(request) {
     const restaurantId = restaurantDoc.id;
     const restaurantData = restaurantDoc.data();
 
+    const restaurantData = restaurantDoc.data();
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
     // Procesar el pago según su estado
