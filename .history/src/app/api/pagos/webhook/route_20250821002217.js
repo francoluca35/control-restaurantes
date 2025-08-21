@@ -111,7 +111,9 @@ export async function POST(request) {
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
     // ACTUALIZAR EL ESTADO DEL RESTAURANTE PARA TRIGGER NOTIFICACIÓN
-    console.log("🔄 Actualizando estado del restaurante para notificación...");
+    console.log(
+      "🔄 Actualizando estado del restaurante para notificación..."
+    );
     await updateDoc(doc(db, "restaurantes", restaurantId), {
       estadoPago: "pagado",
       fechaPago: serverTimestamp(),

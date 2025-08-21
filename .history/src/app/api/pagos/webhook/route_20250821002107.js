@@ -55,12 +55,6 @@ export async function POST(request) {
       amount: paymentData.transaction_amount,
     });
 
-    // Solo procesar pagos aprobados
-    if (paymentData.status !== "approved") {
-      console.log(`⚠️ Pago no aprobado, estado: ${paymentData.status}`);
-      return NextResponse.json({ status: "ignored" });
-    }
-
     // Extraer información del restaurante
     const activationCode = paymentData.external_reference; // Código de activación
     const orderTotal = paymentData.transaction_amount;
@@ -110,28 +104,52 @@ export async function POST(request) {
 
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
-    // ACTUALIZAR EL ESTADO DEL RESTAURANTE PARA TRIGGER NOTIFICACIÓN
-    console.log("🔄 Actualizando estado del restaurante para notificación...");
-    await updateDoc(doc(db, "restaurantes", restaurantId), {
-      estadoPago: "pagado",
-      fechaPago: serverTimestamp(),
-      ultimoPago: {
-        monto: orderTotal,
-        fecha: serverTimestamp(),
-        paymentId: paymentData.id,
-        externalReference: paymentData.external_reference,
-      },
-    });
-    console.log(
-      "✅ Estado del restaurante actualizado - Notificación debería aparecer"
-    );
+    // Procesar el pago según su estado
+    console.log("🔄 Procesando pago con estado:", paymentData.status);
 
-    // Registrar la transacción básica
-    await recordPaymentTransaction(
-      paymentData,
-      restaurantId,
-      restaurantData.nombre
-    );
+    switch (paymentData.status) {
+      case "approved":
+        // ACTUALIZAR EL ESTADO DEL RESTAURANTE PARA TRIGGER NOTIFICACIÓN
+        console.log(
+          "🔄 Actualizando estado del restaurante para notificación..."
+        );
+        await updateDoc(doc(db, "restaurantes", restaurantId), {
+          estadoPago: "pagado",
+          fechaPago: serverTimestamp(),
+          ultimoPago: {
+            monto: orderTotal,
+            fecha: serverTimestamp(),
+            paymentId: paymentData.id,
+            externalReference: paymentData.external_reference,
+          },
+        });
+        console.log(
+          "✅ Estado del restaurante actualizado - Notificación debería aparecer"
+        );
+
+        // Registrar la transacción en Firestore
+        await recordPaymentTransaction(
+          paymentData,
+          restaurantId,
+          restaurantData.nombre
+        );
+        break;
+
+      case "rejected":
+        await handleRejectedPayment(paymentData, restaurantId);
+        break;
+
+      case "pending":
+        await handlePendingPayment(paymentData, restaurantId);
+        break;
+
+      case "cancelled":
+        await handleCancelledPayment(paymentData, restaurantId);
+        break;
+
+      default:
+        console.log(`⚠️ Estado de pago no manejado: ${paymentData.status}`);
+    }
 
     return NextResponse.json({ status: "success" });
   } catch (error) {
@@ -140,6 +158,63 @@ export async function POST(request) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+async function handleRejectedPayment(paymentData, restaurantId) {
+  try {
+    const paymentRecord = {
+      restaurantId,
+      paymentId: paymentData.id,
+      externalReference: paymentData.external_reference,
+      status: "rejected",
+      reason: paymentData.status_detail,
+      date: new Date(),
+      isIndividualAccount: true,
+    };
+
+    await addDoc(collection(db, "payments"), paymentRecord);
+    console.log(
+      `Payment rejected for restaurant ${restaurantId}: ${paymentData.status_detail}`
+    );
+  } catch (error) {
+    console.error("Error handling rejected payment:", error);
+  }
+}
+
+async function handlePendingPayment(paymentData, restaurantId) {
+  try {
+    const paymentRecord = {
+      restaurantId,
+      paymentId: paymentData.id,
+      externalReference: paymentData.external_reference,
+      status: "pending",
+      date: new Date(),
+      isIndividualAccount: true,
+    };
+
+    await addDoc(collection(db, "payments"), paymentRecord);
+    console.log(`Payment pending for restaurant ${restaurantId}`);
+  } catch (error) {
+    console.error("Error handling pending payment:", error);
+  }
+}
+
+async function handleCancelledPayment(paymentData, restaurantId) {
+  try {
+    const paymentRecord = {
+      restaurantId,
+      paymentId: paymentData.id,
+      externalReference: paymentData.external_reference,
+      status: "cancelled",
+      date: new Date(),
+      isIndividualAccount: true,
+    };
+
+    await addDoc(collection(db, "payments"), paymentRecord);
+    console.log(`Payment cancelled for restaurant ${restaurantId}`);
+  } catch (error) {
+    console.error("Error handling cancelled payment:", error);
   }
 }
 
@@ -156,8 +231,11 @@ async function recordPaymentTransaction(
       externalReference: paymentData.external_reference,
       amount: paymentData.transaction_amount,
       status: paymentData.status,
+      statusDetail: paymentData.status_detail,
+      paymentMethod: paymentData.payment_method?.type || "unknown",
       date: new Date(),
       processed: true,
+      isIndividualAccount: true,
     };
 
     await addDoc(collection(db, "paymentTransactions"), transaction);
