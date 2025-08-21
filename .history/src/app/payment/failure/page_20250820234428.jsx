@@ -19,7 +19,9 @@ function PaymentFailureContent() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
       <div className="text-center max-w-md mx-auto p-6">
         <div className="text-red-500 text-6xl mb-4">❌</div>
-        <h1 className="text-2xl font-bold text-red-400 mb-2">Pago Fallido</h1>
+        <h1 className="text-2xl font-bold text-red-400 mb-2">
+          Pago Fallido
+        </h1>
         <p className="text-gray-300 mb-6">
           Lo sentimos, el pago no pudo ser procesado. Esto puede deberse a:
         </p>
@@ -40,7 +42,7 @@ function PaymentFailureContent() {
           >
             Intentar Nuevamente
           </button>
-
+          
           <button
             onClick={handleContact}
             className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold"
@@ -55,16 +57,14 @@ function PaymentFailureContent() {
 
 export default function PaymentFailurePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
-            <p className="text-gray-300">Cargando...</p>
-          </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-gray-300">Cargando...</p>
         </div>
-      }
-    >
+      </div>
+    }>
       <PaymentFailureContent />
     </Suspense>
   );

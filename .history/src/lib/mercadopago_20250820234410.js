@@ -97,11 +97,7 @@ export const processPaymentNotification = async (notificationData) => {
 
   try {
     // Verificar que tenemos datos básicos de la notificación
-    if (
-      !notificationData ||
-      !notificationData.data ||
-      !notificationData.data.id
-    ) {
+    if (!notificationData || !notificationData.data || !notificationData.data.id) {
       console.log("❌ Notificación inválida: datos faltantes");
       return null;
     }
