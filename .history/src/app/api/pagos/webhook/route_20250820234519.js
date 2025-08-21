@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import mercadopago from "mercadopago";
 import { db } from "../../../../lib/firebase";
-import {
-  doc,
-  updateDoc,
-  collection,
-  addDoc,
-  getDoc,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
+import { doc, updateDoc, collection, addDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 export async function POST(request) {
   try {
