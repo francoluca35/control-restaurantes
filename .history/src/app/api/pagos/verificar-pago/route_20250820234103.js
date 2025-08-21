@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mercadopago from "mercadopago";
-import { db } from "../../../../lib/firebase";
+import { db } from "../../../lib/firebase";
 import {
   doc,
   getDoc,
