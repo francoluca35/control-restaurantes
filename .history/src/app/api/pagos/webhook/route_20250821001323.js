@@ -121,11 +121,9 @@ export async function POST(request) {
           restaurantName,
           orderTotal
         );
-
+        
         // ACTUALIZAR EL ESTADO DEL RESTAURANTE PARA TRIGGER NOTIFICACIÓN
-        console.log(
-          "🔄 Actualizando estado del restaurante para notificación..."
-        );
+        console.log("🔄 Actualizando estado del restaurante para notificación...");
         await updateDoc(doc(db, "restaurantes", restaurantId), {
           estadoPago: "pagado",
           fechaPago: serverTimestamp(),
@@ -133,12 +131,10 @@ export async function POST(request) {
             monto: orderTotal,
             fecha: serverTimestamp(),
             paymentId: paymentData.id,
-            externalReference: paymentData.external_reference,
-          },
+            externalReference: paymentData.external_reference
+          }
         });
-        console.log(
-          "✅ Estado del restaurante actualizado - Notificación debería aparecer"
-        );
+        console.log("✅ Estado del restaurante actualizado - Notificación debería aparecer");
         break;
 
       case "rejected":
@@ -241,7 +237,7 @@ async function handleApprovedPayment(
       status: "approved",
       paymentMethod: paymentData.payment_method?.type || "unknown",
       date: new Date(),
-      transactionId: paymentData.transaction_id || null,
+      transactionId: paymentData.transaction_id,
       mercadopagoAccount: restaurantId,
       isIndividualAccount: true,
       orderData: orderData,

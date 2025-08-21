@@ -241,7 +241,7 @@ async function handleApprovedPayment(
       status: "approved",
       paymentMethod: paymentData.payment_method?.type || "unknown",
       date: new Date(),
-      transactionId: paymentData.transaction_id || null,
+      transactionId: paymentData.transaction_id,
       mercadopagoAccount: restaurantId,
       isIndividualAccount: true,
       orderData: orderData,
