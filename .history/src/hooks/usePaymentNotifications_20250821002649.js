@@ -89,12 +89,9 @@ export const usePaymentNotifications = () => {
                 (!previousData || previousData.estadoPago !== "pagado")
               ) {
                 // Obtener el monto del último pago
-                const monto =
-                  restaurantData.ultimoPago?.monto ||
-                  restaurantData.precio ||
-                  0;
+                const monto = restaurantData.ultimoPago?.monto || restaurantData.precio || 0;
                 const moneda = restaurantData.moneda || "ARS";
-
+                
                 console.log("💰 Pago recién aprobado detectado:", {
                   restaurant: restaurantData.nombre,
                   amount: monto,
