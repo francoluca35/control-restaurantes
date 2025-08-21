@@ -1,0 +1,88 @@
+import mercadopago from "mercadopago";
+
+// Configurar Mercado Pago con las credenciales del entorno
+const configureMercadoPago = () => {
+  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
+  if (!accessToken) {
+    console.warn("⚠️ MERCADOPAGO_ACCESS_TOKEN no configurado en .env.local");
+    return false;
+  }
+
+  // Verificar que no sea el token de ejemplo del env.example
+  if (
+    accessToken ===
+    "APP_USR-3805637089394876-062320-da82ba95333079012f1e0776e1963bba-740803134"
+  ) {
+    console.warn(
+      "⚠️ MERCADOPAGO_ACCESS_TOKEN parece ser un token de ejemplo del env.example. Por favor, usa tus credenciales reales de MercadoPago"
+    );
+    return false;
+  }
+
+  try {
+    // Configurar MercadoPago con la API v1.5.14
+    mercadopago.configure({
+      access_token: accessToken,
+    });
+    console.log("✅ Mercado Pago configurado correctamente");
+    return true;
+  } catch (error) {
+    console.error("❌ Error configurando Mercado Pago:", error);
+    return false;
+  }
+};
+
+// Obtener la clave pública para el frontend
+export const getPublicKey = () => {
+  return process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || null;
+};
+
+// Crear preferencia de pago
+export const createPaymentPreference = async (paymentData) => {
+  const isConfigured = configureMercadoPago();
+
+  if (!isConfigured) {
+    throw new Error(
+      "Mercado Pago no está configurado. Verifica MERCADOPAGO_ACCESS_TOKEN en .env.local"
+    );
+  }
+
+  try {
+    const preference = {
+      items: [
+        {
+          title: paymentData.title || "Activación de Restaurante",
+          unit_price: paymentData.amount,
+          quantity: 1,
+          currency_id: paymentData.currency || "ARS",
+        },
+      ],
+      external_reference: paymentData.externalReference,
+    };
+
+    const response = await mercadopago.preferences.create(preference);
+    console.log("✅ Preferencia de pago creada:", response.body.id);
+    return response.body;
+  } catch (error) {
+    console.error("Error creando preferencia de pago:", error);
+    throw new Error("Error al crear la preferencia de pago");
+  }
+};
+
+// Función para verificar el estado de un pago
+export const checkPaymentStatus = async (paymentId) => {
+  const isConfigured = configureMercadoPago();
+
+  if (!isConfigured) {
+    throw new Error("Mercado Pago no está configurado");
+  }
+
+  try {
+    const payment = await mercadopago.payment.get(paymentId);
+    return payment.body;
+  } catch (error) {
+    console.error("Error consultando estado del pago:", error);
+    throw new Error("Error al consultar el estado del pago");
+  }
+};
