@@ -43,9 +43,9 @@ export async function POST(request) {
     mercadopago.configure({
       access_token: process.env.MERCADOPAGO_ACCESS_TOKEN,
     });
-
+    
     console.log("🔧 Configurando Mercado Pago con credenciales globales");
-
+    
     const payment = await mercadopago.payment.get(paymentId);
     const paymentData = payment.response;
 
@@ -53,19 +53,18 @@ export async function POST(request) {
       id: paymentData.id,
       status: paymentData.status,
       external_reference: paymentData.external_reference,
-      amount: paymentData.transaction_amount,
+      amount: paymentData.transaction_amount
     });
 
     // Extraer información del restaurante
     const restaurantId = paymentData.external_reference; // Usar external_reference como restaurantId
-    const restaurantName =
-      paymentData.additional_info?.restaurant_name || "Restaurante";
+    const restaurantName = paymentData.additional_info?.restaurant_name || "Restaurante";
     const orderTotal = paymentData.transaction_amount;
 
     console.log("🏪 Información del restaurante:", {
       restaurantId,
       restaurantName,
-      orderTotal,
+      orderTotal
     });
 
     if (!restaurantId) {
@@ -78,7 +77,7 @@ export async function POST(request) {
 
     // Obtener datos del restaurante para verificar que existe
     const restaurantDoc = await getDoc(doc(db, "restaurantes", restaurantId));
-
+    
     if (!restaurantDoc.exists()) {
       console.error("❌ Restaurante no encontrado en Firestore:", restaurantId);
       return NextResponse.json(
@@ -91,12 +90,10 @@ export async function POST(request) {
     console.log("✅ Restaurante encontrado:", restaurantData.nombre);
 
     // Procesar el pago según su estado
-    console.log("🔄 Procesando pago con estado:", paymentData.status);
-
-    switch (paymentData.status) {
+    switch (finalPaymentData.status) {
       case "approved":
         await handleApprovedPayment(
-          paymentData,
+          finalPaymentData,
           restaurantId,
           restaurantName,
           orderTotal
@@ -104,23 +101,27 @@ export async function POST(request) {
         break;
 
       case "rejected":
-        await handleRejectedPayment(paymentData, restaurantId);
+        await handleRejectedPayment(finalPaymentData, restaurantId);
         break;
 
       case "pending":
-        await handlePendingPayment(paymentData, restaurantId);
+        await handlePendingPayment(finalPaymentData, restaurantId);
         break;
 
       case "cancelled":
-        await handleCancelledPayment(paymentData, restaurantId);
+        await handleCancelledPayment(finalPaymentData, restaurantId);
         break;
 
       default:
-        console.log(`⚠️ Estado de pago no manejado: ${paymentData.status}`);
+        console.log(`Payment status not handled: ${finalPaymentData.status}`);
     }
 
     // Registrar la transacción en Firestore
-    await recordPaymentTransaction(paymentData, restaurantId, restaurantName);
+    await recordPaymentTransaction(
+      finalPaymentData,
+      restaurantId,
+      restaurantName
+    );
 
     return NextResponse.json({ status: "success" });
   } catch (error) {
