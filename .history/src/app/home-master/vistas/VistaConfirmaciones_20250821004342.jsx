@@ -1,0 +1,333 @@
+"use client";
+import { useState, useEffect } from "react";
+import { db } from "../../../lib/firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
+import {
+  FaCheckCircle,
+  FaClock,
+  FaTimes,
+  FaDollarSign,
+  FaStore,
+  FaCalendarAlt,
+  FaSync,
+  FaCalendar,
+} from "react-icons/fa";
+
+export default function VistaConfirmaciones() {
+  const [pagos, setPagos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const cargarPagos = async () => {
+      try {
+        setLoading(true);
+        console.log("🔍 Cargando confirmaciones de pagos...");
+
+        // Query para obtener todos los pagos ordenados por fecha
+        const pagosQuery = query(
+          collection(db, "paymentTransactions"),
+          orderBy("date", "desc")
+        );
+
+        // Listener en tiempo real para nuevos pagos
+        const unsubscribe = onSnapshot(
+          pagosQuery,
+          (snapshot) => {
+            const pagosData = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+
+            console.log("📊 Pagos cargados:", pagosData.length);
+            setPagos(pagosData);
+            setLoading(false);
+          },
+          (error) => {
+            console.error("❌ Error cargando pagos:", error);
+            setError("Error al cargar los pagos");
+            setLoading(false);
+          }
+        );
+
+        return unsubscribe;
+      } catch (error) {
+        console.error("❌ Error en cargarPagos:", error);
+        setError("Error al cargar los pagos");
+        setLoading(false);
+      }
+    };
+
+    cargarPagos();
+  }, []);
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "approved":
+        return <FaCheckCircle className="text-green-500" />;
+      case "pending":
+        return <FaClock className="text-yellow-500" />;
+      case "rejected":
+      case "cancelled":
+        return <FaTimes className="text-red-500" />;
+      default:
+        return <FaClock className="text-gray-500" />;
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "approved":
+        return "Aprobado";
+      case "pending":
+        return "Pendiente";
+      case "rejected":
+        return "Rechazado";
+      case "cancelled":
+        return "Cancelado";
+      default:
+        return status;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "rejected":
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+    const dateObj = date.toDate ? date.toDate() : new Date(date);
+    return dateObj.toLocaleString("es-AR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatAmount = (amount) => {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
+    }).format(amount);
+  };
+
+  const refreshPagos = () => {
+    setLoading(true);
+    // El listener automáticamente actualizará los datos
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-6"></div>
+          <h2 className="text-white text-xl font-semibold mb-2">
+            Cargando Confirmaciones
+          </h2>
+          <p className="text-gray-400 text-sm">Obteniendo datos de pagos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 border-4 border-red-500/30 border-t-red-500 rounded-full mx-auto mb-6"></div>
+          <h2 className="text-white text-xl font-semibold mb-2">Error</h2>
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Confirmaciones de Pagos
+              </h1>
+              <p className="text-gray-400">
+                Historial de todos los pagos realizados en tiempo real
+              </p>
+            </div>
+            <button
+              onClick={refreshPagos}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            >
+              <FaSync className="w-4 h-4" />
+              <span>Actualizar</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100">Pagos Aprobados</p>
+                <p className="text-2xl font-bold">
+                  {pagos.filter((p) => p.status === "approved").length}
+                </p>
+              </div>
+              <FaCheckCircle className="w-8 h-8" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100">Pagos Pendientes</p>
+                <p className="text-2xl font-bold">
+                  {pagos.filter((p) => p.status === "pending").length}
+                </p>
+              </div>
+              <FaClock className="w-8 h-8" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-100">Pagos Rechazados</p>
+                <p className="text-2xl font-bold">
+                  {pagos.filter((p) => p.status === "rejected").length}
+                </p>
+              </div>
+              <FaTimes className="w-8 h-8" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100">Total Pagos</p>
+                <p className="text-2xl font-bold">{pagos.length}</p>
+              </div>
+              <FaDollarSign className="w-8 h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Pagos List */}
+        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Historial de Pagos ({pagos.length})
+            </h2>
+          </div>
+
+          {pagos.length === 0 ? (
+            <div className="p-8 text-center">
+              <FaDollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No hay pagos registrados
+              </h3>
+              <p className="text-gray-500">
+                Los pagos aparecerán aquí automáticamente cuando se realicen.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Restaurante
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Monto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fecha
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID Pago
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {pagos.map((pago) => (
+                    <tr key={pago.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FaStore className="w-4 h-4 text-gray-400 mr-3" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {pago.restaurantName || "Restaurante"}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              ID: {pago.restaurantId}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {formatAmount(pago.amount)}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {pago.paymentMethod || "Mercado Pago"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(
+                            pago.status
+                          )}`}
+                        >
+                          {getStatusIcon(pago.status)}
+                          <span className="ml-1">
+                            {getStatusText(pago.status)}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FaCalendar className="w-4 h-4 text-gray-400 mr-2" />
+                          <div className="text-sm text-gray-900">
+                            {formatDate(pago.date)}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {pago.paymentId || "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
