@@ -49,52 +49,24 @@ export async function POST(req) {
     });
 
     // 2. Crear documento del restaurante usando el ID generado
+    // SOLO se crea el documento básico, SIN usuarios, SIN mesas, SIN nada adicional
     await setDoc(doc(db, "restaurantes", restauranteId), {
       creadoEn: timestamp,
       nombre: restaurante, // Guardar el nombre original
       restauranteId: restauranteId, // Guardar también el ID generado
+      activado: false, // Estado inicial: no activado
+      email: email,
+      codigoActivacion: codActivacion,
     });
 
-    // 3. Crear subcolección users usando el ID generado
-    await setDoc(doc(db, "restaurantes", restauranteId, "users", "admin"), {
-      email,
-      password,
-      usuario: restaurante,
-      codActivacion,
-    });
-
-    // 4. Crear subcolección tables con un doc por defecto usando el ID generado
-    await setDoc(doc(db, "restaurantes", restauranteId, "tables", "default"), {
-      mesa: 0,
-      estado: "libre",
-    });
-
-    // 5. Crear caja registradora inicial usando el ID generado
-    const cajaRef = collection(
-      db,
-      "restaurantes",
-      restauranteId,
-      "CajaRegistradora"
-    );
-    await addDoc(cajaRef, {
-      Apertura: "0",
-      Cierre: "",
-      Extraccion: {},
-      Ingresos: {},
-      ultimaActualizacion: serverTimestamp(),
-    });
-
-    // 6. Crear documento de dinero virtual inicial usando el ID generado
-    const dineroRef = collection(db, "restaurantes", restauranteId, "Dinero");
-    await addDoc(dineroRef, {
-      Virtual: "0",
-      IngresosVirtual: {},
-      EgresosVirtual: {},
-      ultimaActualizacion: serverTimestamp(),
-    });
+    // NO se crean usuarios - el cliente los creará después
+    // NO se crean mesas - el cliente las creará después
+    // NO se crea caja registradora - el cliente la creará después
+    // NO se crea dinero virtual - el cliente lo creará después
+    // NO se crea NADA más - todo lo crea el cliente desde cero
 
     console.log(
-      "✅ Restaurante registrado con caja registradora y dinero virtual inicial"
+      "✅ Restaurante registrado SOLO con datos básicos. El cliente creará usuarios, mesas y configuración después."
     );
 
     return NextResponse.json({
